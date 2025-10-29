@@ -10,7 +10,7 @@ class m230131_154112_create_utm_umarov_table extends Migration
      */
     public function safeUp()
     {
-        $tableOptions = "CHARACTER SET utf8 COLLATE utf8_general_ci ENGINE=InnoDB";
+        $tableOptions = "CHARACTER SET utf8mb4 ENGINE=InnoDB";
         $this->createTable(self::TABLE, [
             'id' => $this->primaryKey(),
             'invoice_id' => $this->integer()->notNull()->defaultValue(0),
@@ -25,6 +25,16 @@ class m230131_154112_create_utm_umarov_table extends Migration
         ], $tableOptions);
 
         $this->createIndex('index_invoice', self::TABLE, 'invoice_id');
+
+         $this->addForeignKey(
+            'fk-invoice_umarov-id',
+            self::TABLE,
+            'invoice_id',
+            'invoice_umarov',
+            'id',
+            'CASCADE',
+            'CASCADE',
+        );
     }
 
     /**

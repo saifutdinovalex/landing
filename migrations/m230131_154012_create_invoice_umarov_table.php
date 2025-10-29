@@ -11,7 +11,7 @@ class m230131_154012_create_invoice_umarov_table extends Migration
      */
     public function safeUp()
     {
-        $tableOptions = "CHARACTER SET utf8 COLLATE utf8_general_ci ENGINE=InnoDB";
+        $tableOptions = "CHARACTER SET utf8mb4 ENGINE=InnoDB";
         $this->createTable(self::TABLE, [
             'id' => $this->primaryKey(),
             'name' => $this->string(),

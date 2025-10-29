@@ -8,17 +8,21 @@ use models\response\Response;
 
 abstract class AbstractModelBase extends AbstractModel
 {
-    public $user_id;
     protected $data_response = [];
 
+    /**
+     * {@inheritdoc}
+     * @return array
+     */
     public function rules()
     {
-        return ArrayHelper::merge(parent::rules(),[
-            [['user_id'], 'integer'],
-            [['user_id'], 'default', 'value' => 0],
-        ]);
+        return parent::rules();
     }
 
+    /**
+     * {@inheritdoc}
+     * @return array
+     */
     public function getResponse()
     {
         $response = new Response();
@@ -29,15 +33,12 @@ abstract class AbstractModelBase extends AbstractModel
         return $response->get();
     }
 
-    protected function initData()
-    {
-        $this->user_id = ($this->user_id && $this->checkIsManager())?:\Yii::$app->getUser()->getId();
-    }
-
+    /*
+        value - array result for response
+     */
     protected function setDataResponse($value)
     {
         $this->data_response = $value;
         return $this;
     }
-
 }

@@ -9,6 +9,10 @@ use models\invoice\Config;
 
 class Read extends AbstractModel
 {
+    /**
+     * {@inheritdoc}
+     * @return array
+     */
     public function getResponse()
     {
         $response = new Response();

@@ -12,6 +12,6 @@ class Hash
      */
     public static function get($invoice_id, $token)
     {
-        return $invoice_id.'__'.hash_hmac('sha256', $token, \Yii::getAlias('@secret_ykassa_landing'));
+        return $invoice_id.'__'.hash_hmac('sha256', $token, \Yii::getAlias('@secret'));
     }
 }

@@ -31,9 +31,7 @@ class BaseYooNotification extends YooKassaFactory
         
         if ($notificationObject->getEvent() === NotificationEventType::PAYMENT_CANCELED) {
             $object->setYookassaCancellationDetails($this->payment_response->getCancellationDetails()->getReason()); 
-            $this->status_text = 'canceled';   
         } else {
-            $this->status_text = 'succeeded';
             $object->setStatus((int)$this->payment_response->getPaid());    
         }
         

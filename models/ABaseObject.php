@@ -10,28 +10,43 @@ abstract class ABaseObject
     protected $observers;
     protected $model_ar;
     
+    /**
+     * {@inheritdoc}
+     */
     public function getResult()
     {
         return $this->result;
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function getErrors()
     {
         return $this->errors;
     }
 
+    /**
+     * {@inheritdoc}
+     */
     protected function afterBuild()
     {
         $this->notifyObservers();
         $this->deleteCache();
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function addObserver(Observer $observer)
     {
         $this->observers[] = $observer;
         return $this;
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function notifyObservers()
     {
         if (!empty($this->observers)) {
@@ -50,6 +65,9 @@ abstract class ABaseObject
         return $this;
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function getModelAr()
     {
         return $this->model_ar;

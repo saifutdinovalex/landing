@@ -3,7 +3,6 @@
 namespace models\bank;
 
 use Yii;
-use \YooKassa\Client;
 use AbstractModelBase;
 use helpers\YooError;
 use response\Response;
@@ -105,7 +104,7 @@ class BaseCreate extends AbstractModelBase
                 $this->updateInvoice();    
             }
         } catch (\Exception $e) {
-            $this->addError('error', \Yii::t('admin', 'There was a payment error. Contact support chat'));
+            $this->addError('error', \Yii::t('error', 'There was a payment error. Contact support chat'));
             $this->sendError();
         }
         
