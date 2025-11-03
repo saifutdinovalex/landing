@@ -1,28 +1,31 @@
 <?php
 
+declare(strict_types=1);
+
 namespace ar;
 
 use Yii;
+use yii\db\ActiveRecord;
 
 /**
  * This is the model class for table "utm_umarov".
  *
  * @property int $id
  * @property int $invoice_id
- * @property string $source
- * @property string $medium
- * @property string $campaign
- * @property string $param
- * @property string $term
- * @property string $content
- * @property string $created_at
+ * @property string|null $source
+ * @property string|null $medium
+ * @property string|null $campaign
+ * @property string|null $param
+ * @property string|null $term
+ * @property string|null $content
+ * @property string|null $created_at
  */
-class ArUtmUmarov extends \yii\db\ActiveRecord
+class ArUtmUmarov extends ActiveRecord
 {
     /**
      * {@inheritdoc}
      */
-    public static function tableName()
+    public static function tableName(): string
     {
         return 'utm_umarov';
     }
@@ -30,19 +33,23 @@ class ArUtmUmarov extends \yii\db\ActiveRecord
     /**
      * {@inheritdoc}
      */
-    public function rules()
+    public function rules(): array
     {
         return [
             [['invoice_id'], 'integer'],
             [['created_at'], 'safe'],
-            [['source', 'medium', 'campaign', 'param', 'term', 'content'], 'string', 'max' => 255],
+            [
+                ['source', 'medium', 'campaign', 'param', 'term', 'content'],
+                'string',
+                'max' => 255,
+            ],
         ];
     }
 
     /**
      * {@inheritdoc}
      */
-    public function attributeLabels()
+    public function attributeLabels(): array
     {
         return [
             'id' => 'ID',

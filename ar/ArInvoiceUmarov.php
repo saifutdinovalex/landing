@@ -1,33 +1,38 @@
 <?php
 
+declare(strict_types=1);
+
 namespace ar;
 
 use Yii;
+use yii\db\ActiveRecord;
 
 /**
  * This is the model class for table "invoice_umarov".
  *
  * @property int $id
- * @property string $name
- * @property string $surname
- * @property string $email
+ * @property string|null $name
+ * @property string|null $surname
+ * @property string|null $email
  * @property int $type_id
  * @property string $money
  * @property int $status
- * @property string $created_at
+ * @property string|null $created_at
  * @property int $is_deleted
- * @property string $payment_id
- * @property string $paid_at
- * @property string $status_yookassa
- * @property string $yookassa_cancellation_details
+ * @property string|null $payment_id
+ * @property string|null $paid_at
+ * @property string|null $status_yookassa
+ * @property string|null $yookassa_cancellation_details
  * @property string $token_payment
+ * 
+ * @property ArUtmUmarov|null $utmData Related UTM data
  */
-class ArInvoiceUmarov extends \yii\db\ActiveRecord
+class ArInvoiceUmarov extends ActiveRecord
 {
     /**
      * {@inheritdoc}
      */
-    public static function tableName()
+    public static function tableName(): string
     {
         return 'invoice_umarov';
     }
@@ -35,21 +40,29 @@ class ArInvoiceUmarov extends \yii\db\ActiveRecord
     /**
      * {@inheritdoc}
      */
-    public function rules()
+    public function rules(): array
     {
         return [
             [['type_id', 'status', 'is_deleted'], 'integer'],
             [['money'], 'number'],
             [['created_at', 'paid_at'], 'safe'],
-            [['name', 'surname', 'email', 'payment_id', 'status_yookassa', 'yookassa_cancellation_details'], 'string', 'max' => 255],
-            [['token_payment'], 'string', 'max' => 32],
+            [
+                ['name', 'surname', 'email', 'payment_id', 'status_yookassa', 'yookassa_cancellation_details'],
+                'string',
+                'max' => 255,
+            ],
+            [
+                ['token_payment'],
+                'string',
+                'max' => 32,
+            ],
         ];
     }
 
     /**
      * {@inheritdoc}
      */
-    public function attributeLabels()
+    public function attributeLabels(): array
     {
         return [
             'id' => 'ID',
@@ -69,6 +82,13 @@ class ArInvoiceUmarov extends \yii\db\ActiveRecord
         ];
     }
 
+    /**
+     * Get related UTM data
+     * 
+     * Establishes one-to-one relationship with UTM tracking data
+     * 
+     * @return \yii\db\ActiveQuery
+     */
     public function getUtmData()
     {
         return $this->hasOne(ArUtmUmarov::class, ['invoice_id' => 'id']);

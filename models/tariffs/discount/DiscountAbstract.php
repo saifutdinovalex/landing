@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace models\tariffs\discount;
 
 use yii\base\Exception;
@@ -17,48 +19,52 @@ use yii\base\Exception;
  */
 abstract class DiscountAbstract
 {
-    protected $type_id = null;
-    protected $value;
-    protected $calculate_value = null;
+    protected ?int $type_id = null;
+    protected mixed $value;
+    protected mixed $calculate_value = null;
 
-    public function __construct($value = null)
+    public function __construct(mixed $value = null)
     {
         $this->value = $value;
     }
 
-    abstract public function calculate($tariff);
+    abstract public function calculate(mixed $tariff): mixed;
 
-    public function setValue($value)
+    public function setValue(mixed $value): self
     {
         $this->value = $value;
+
         return $this;
     }
 
-    public function setTypeId($type_id)
+    public function setTypeId(int $type_id): self
     {
         $this->type_id = $type_id;
+
         return $this;
     }
 
-    public function getCalculateValue()
+    public function getCalculateValue(): mixed
     {
         return $this->calculate_value;
     }
 
-    public function getValue()
+    public function getValue(): mixed
     {
-        if ($this->value === null)
+        if ($this->value === null) {
             throw new Exception('Value is not set');
+        }
+
         return $this->value;
     }
 
-    public function getTypeId()
+    public function getTypeId(): ?int
     {
         return $this->type_id;
     }
 
-    public static function className()
+    public static function className(): string
     {
-        return get_called_class();
+        return static::class;
     }
 }

@@ -2,44 +2,50 @@
 
 namespace models\bank;
 
+use Exception;
+use helpers\Hash;
 use Yii;
 use models\AbstractModelBase;
 use yii\helpers\ArrayHelper;
-use helpers\Hash;
 
 class BasePayment extends AbstractModelBase
-{    
-    public $name;
-    public $surname;
-    public $email;
-    public $utm_source;
-    public $utm_medium;
-    public $utm_campaign;
-    public $utm_content;
-    public $utm_term;
-    public $utm_param;
-    public $token;
+{
+    public ?string $name = null;
+    public ?string $surname = null;
+    public string $email;
+    public ?string $utm_source = null;
+    public ?string $utm_medium = null;
+    public ?string $utm_campaign = null;
+    public ?string $utm_content = null;
+    public ?string $utm_term = null;
+    public ?string $utm_param = null;
+    public string $token;
 
-    protected $confirmation_token;
-    protected $invoice_id;
-    protected $invoice_hash;
-    protected $promo_id = 0;
+    protected ?string $confirmation_token = null;
+    protected ?int $invoice_id = null;
+    protected ?string $invoice_hash = null;
+    protected int $promo_id = 0;
 
-    protected $create_utm;
-    protected $create_invoice;
-    protected $create_payment;
-    protected $read_promo;
+    protected object $create_utm;
+    protected object $create_invoice;
+    protected object $create_payment;
+    protected object $read_promo;
 
     /**
      * {@inheritdoc}
      */
-    public function rules()
+    public function rules(): array
     {
         return ArrayHelper::merge(parent::rules(), [
-            [['email', 'token'],'required'],
+            [['email', 'token'], 'required'],
             [['email', 'promocode', 'name', 'surname'], 'trim'],
             [['name', 'surname'], 'string', 'length' => [1, 255]],
-            ['email', 'email', 'enableIDN' => true, 'message' => Yii::t('error', 'Email is incorrect. ')],
+            [
+                'email',
+                'email',
+                'enableIDN' => true,
+                'message' => Yii::t('error', 'Email is incorrect. ')
+            ],
             [
                 [
                     'utm_source',
@@ -48,9 +54,9 @@ class BasePayment extends AbstractModelBase
                     'utm_content',
                     'utm_term',
                     'utm_param',
-                ], 
+                ],
                 'default',
-                'value' => NULL,
+                'value' => null,
             ],
         ]);
     }
@@ -58,27 +64,32 @@ class BasePayment extends AbstractModelBase
     /**
      * {@inheritdoc}
      */
-    public function execute()
+    public function execute(): bool
     {
         if (parent::execute()) {
             try {
                 $this->createInvoice();
                 $this->createUtm();
                 $this->paymentCreate();
-                $this->setDataResponse(['confirmation_token' => $this->confirmation_token, 'invoice_id' => $this->invoice_hash]);
-                return true;    
-            } catch (\Exception $e) {
+                $this->setDataResponse([
+                    'confirmation_token' => $this->confirmation_token,
+                    'invoice_id' => $this->invoice_hash,
+                ]);
+
+                return true;
+            } catch (Exception $e) {
                 $this->addError('error', $e->getMessage());
-                $this->sendError();   
+                $this->sendError();
             }
         }
+
         return false;
     }
 
     /**
-     * create invoice
+     * Create invoice
      */
-    protected function createInvoice()
+    protected function createInvoice(): void
     {
         $object = $this->create_invoice;
         $object->setName($this->name);
@@ -87,10 +98,13 @@ class BasePayment extends AbstractModelBase
         $object->setPromoId($this->promo_id);
         $object->build();
         $result = $object->getResult();
-        
+
         if ($result) {
             $this->invoice_id = $object->getModelAr()->id;
-            $this->invoice_hash = Hash::get($this->invoice_id, $object->getModelAr()->token_payment);
+            $this->invoice_hash = Hash::get(
+                $this->invoice_id,
+                $object->getModelAr()->token_payment
+            );
         } else {
             $this->addError('error', $object->getErrors());
             $this->sendError();
@@ -98,32 +112,32 @@ class BasePayment extends AbstractModelBase
     }
 
     /**
-     * create payment yookassa
+     * Create payment yookassa
      */
-    protected function paymentCreate()
+    protected function paymentCreate(): void
     {
         $object = $this->create_payment;
         $object->setAttributes(['invoice_id' => $this->invoice_id]);
 
         if ($object->validate() && $object->execute()) {
-            $result = $object->getResponse();    
-        
+            $result = $object->getResponse();
+
             if (isset($result['status']) && $result['status'] == 200) {
                 $this->confirmation_token = $result['data']['confirmation_token'];
             } else {
                 $this->addError('error', $result['message']);
                 $this->sendError();
-            }        
+            }
         } else {
             $this->addError('error', $object->getError());
             $this->sendError();
         }
-    }   
+    }
 
     /**
-     * create utm metriks
+     * Create utm metriks
      */
-    protected function createUtm()
+    protected function createUtm(): void
     {
         $object = $this->create_utm;
         $object->setAttributes([
@@ -137,11 +151,11 @@ class BasePayment extends AbstractModelBase
         ]);
 
         if ($object->validate() && $object->execute()) {
-            $result = $object->getResponse();    
-            
+            $result = $object->getResponse();
+
             if (!isset($result['status']) || $result['status'] != 200) {
                 Yii::error($result['message']);
-            } 
+            }
         }
     }
 }

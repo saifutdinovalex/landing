@@ -2,36 +2,37 @@
 
 namespace models\bank;
 
-use Yii;
-use AbstractModelBase;
+use Exception;
 use helpers\YooError;
 use response\Response;
+use Yii;
+use AbstractModelBase;
 use yii\helpers\ArrayHelper;
 
 class BaseCreate extends AbstractModelBase
 {
-    public $invoice_id;
+    public int $invoice_id;
 
-    protected $amount;
-    protected $confirmation_token;
-    protected $invoice;
-    protected $payment_response;
-    protected $errors_cancel;
-    protected $hash;
-    protected $url_success;
-    protected $type_service;
-    protected $invoice_model;
-    protected $invoice_save;
-    protected $get_receipt;
-    protected $litter_invoice;
+    protected float $amount;
+    protected ?string $confirmation_token = null;
+    protected ?object $invoice = null;
+    protected ?object $payment_response = null;
+    protected ?object $errors_cancel = null;
+    protected string $hash;
+    protected string $url_success;
+    protected string $type_service;
+    protected string $invoice_model;
+    protected object $invoice_save;
+    protected object $get_receipt;
+    protected string $litter_invoice;
 
     /**
      * {@inheritdoc}
      */
-    public function rules()
+    public function rules(): array
     {
         return ArrayHelper::merge(parent::rules(), [
-            [['invoice_id'],'required'],
+            [['invoice_id'], 'required'],
             ['invoice_id', 'integer'],
         ]);
     }
@@ -39,12 +40,13 @@ class BaseCreate extends AbstractModelBase
     /**
      * {@inheritdoc}
      */
-    public function execute()
+    public function execute(): bool
     {
         if (parent::execute()) {
             $this->initData();
             $this->paymentCreate();
             $this->setDataResponse(['confirmation_token' => $this->confirmation_token]);
+
             return true;
         }
 
@@ -54,10 +56,14 @@ class BaseCreate extends AbstractModelBase
     /**
      * {@inheritdoc}
      */
-    protected function initData()
+    protected function initData(): void
     {
         $model = $this->invoice_model;
-        $this->invoice = $model::find()->andWhere(['id' => $this->invoice_id, 'is_deleted' => 0, 'status' => 0])->one();
+        $this->invoice = $model::find()->andWhere([
+            'id' => $this->invoice_id,
+            'is_deleted' => 0,
+            'status' => 0,
+        ])->one();
 
         if (!$this->invoice) {
             $this->addError('error', 'Not Exists');
@@ -70,7 +76,7 @@ class BaseCreate extends AbstractModelBase
     /**
      * создать платеж в юмани
      */
-    protected function paymentCreate()
+    protected function paymentCreate(): void
     {
         try {
             $client = Yii::$app->yookassa->getBase();
@@ -78,36 +84,39 @@ class BaseCreate extends AbstractModelBase
             $response = $client->createPayment(
                 [
                     'amount' => [
-                        'value' => (string)$this->amount,
+                        'value' => (string) $this->amount,
                         'currency' => 'RUB',
                     ],
-                    'confirmation' => array(
+                    'confirmation' => [
                         'type' => 'embedded',
                         'locale' => 'ru_RU',
                         'return_url' => $this->url_success,
-                    ),
+                    ],
                     'capture' => true,
-                    'description' => 'Счет № '.$this->litter_invoice.$this->invoice_id,
+                    'description' => 'Счет № ' . $this->litter_invoice . $this->invoice_id,
                     'metadata' => [
                         'invoice_id' => $this->invoice_id,
                         'hash' => $this->invoice->token_payment,
                         'type_service' => $this->type_service,
-                    ],   
-                    'receipt' => $this->getReceipt(),              
+                    ],
+                    'receipt' => $this->getReceipt(),
                 ],
                 $idempotenceKey
             );
             $this->payment_response = $response;
 
             if ($this->payment_response) {
-                $this->getErrorCancel();   
-                $this->updateInvoice();    
+                $this->getErrorCancel();
+                $this->updateInvoice();
             }
-        } catch (\Exception $e) {
-            $this->addError('error', \Yii::t('error', 'There was a payment error. Contact support chat'));
+        } catch (Exception $e) {
+            $this->addError(
+                'error',
+                \Yii::t('error', 'There was a payment error. Contact support chat')
+            );
             $this->sendError();
         }
-        
+
         if ($this->errors_cancel) {
             $this->sendError();
         }
@@ -116,7 +125,7 @@ class BaseCreate extends AbstractModelBase
     /**
      * обновить данные в invoice
      */
-    protected function updateInvoice()
+    protected function updateInvoice(): void
     {
         $object = $this->invoice_save;
         $object->setId($this->invoice_id);
@@ -124,12 +133,12 @@ class BaseCreate extends AbstractModelBase
         $object->setPaymentId($this->payment_response->getId());
 
         if ($this->errors_cancel) {
-            $object->setYookassaCancellationDetails($this->errors_cancel->getReason());    
-        } 
-        
+            $object->setYookassaCancellationDetails($this->errors_cancel->getReason());
+        }
+
         $object->build();
         $result = $object->getResult();
-        
+
         if ($result !== true) {
             $this->addError('error', $object->getErrors());
             $this->sendError();
@@ -139,7 +148,7 @@ class BaseCreate extends AbstractModelBase
     /**
      * получить описание ошибки и токен
      */
-    protected function getErrorCancel()
+    protected function getErrorCancel(): void
     {
         $this->errors_cancel = $this->payment_response->getCancellationDetails();
 
@@ -154,52 +163,54 @@ class BaseCreate extends AbstractModelBase
             $this->addError('error', $error);
         } else {
             if (!empty($this->payment_response->confirmation)) {
-                $this->confirmation_token = $this->payment_response->getConfirmation()->getConfirmationToken();
+                $this->confirmation_token = $this->payment_response
+                    ->getConfirmation()
+                    ->getConfirmationToken();
             }
         }
     }
 
     /**
      * отправить данные для налога
-     * @return [type] [description]
      */
-    protected function getReceipt()
+    protected function getReceipt(): array
     {
         $object = $this->get_receipt;
         $object->setEmail($this->invoice->email);
         $object->setPhone('');
         $object->setAmount($this->invoice->money);
         $object->build();
+
         return $object->getResult();
     }
 
     /**
      * указываем урл для успшеной оплаты
-     * @param string $value
-     */     
-    public function setUrlSuccess($value)
+     */
+    public function setUrlSuccess(string $value): self
     {
         $this->url_success = $value;
+
         return $this;
     }
 
     /**
      * рзаные типы лендингов
-     * @param string $value
      */
-    public function setTypeService($value)
+    public function setTypeService(string $value): self
     {
         $this->type_service = $value;
+
         return $this;
     }
 
     /**
      * добавляем букву к номеру счета
-     * @param string $value 
      */
-    public function setLitterInvoice($value)
+    public function setLitterInvoice(string $value): self
     {
         $this->litter_invoice = $value;
+
         return $this;
     }
 }

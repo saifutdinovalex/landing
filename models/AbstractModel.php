@@ -10,7 +10,7 @@ use yii\base\Model;
 abstract class AbstractModel extends Model
 {
     /** implements method */
-    public function execute()
+    public function execute(): bool
     {
         return true;
     }

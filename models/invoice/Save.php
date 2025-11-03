@@ -1,30 +1,33 @@
 <?php
 
+declare(strict_types=1);
+
 namespace models\invoice;
 
-use Yii;
-use models\ar\ArInvoiceUmarov;
 use models\ABaseObject;
+use models\ar\ArInvoiceUmarov;
 use models\invoice\money\Read as ReadMoney;
+use Yii;
 
 class Save extends ABaseObject
 {
-    protected $data;
+    protected array $data = [];
 
-    public function __call($name, $arguments)
+    public function __call(string $name, array $arguments): self
     {
         $name = $this->getNameCallAttribute($name);
         $this->data[$name] = $arguments[0];
+
         return $this;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function build()
+    public function build(): self
     {
         if (isset($this->data['id'])) {
-            $model = ArInvoiceUmarov::findOne($this->data['id']);    
+            $model = ArInvoiceUmarov::findOne($this->data['id']);
         } else {
             $model = $this->createInvoice();
         }
@@ -34,7 +37,7 @@ class Save extends ABaseObject
         }
 
         $model = $this->savePaidYoo($model);
-            
+
         if (!$model->save()) {
             $this->errors = $model->getErrors();
         } else {
@@ -42,46 +45,50 @@ class Save extends ABaseObject
             $this->result = true;
             $this->afterBuild();
         }
+
         return $this;
     }
 
     /**
-     * create invoice
-     * @return object
+     * Create invoice
      */
-    protected function createInvoice()
+    protected function createInvoice(): ArInvoiceUmarov
     {
         $model = new ArInvoiceUmarov();
         $model->created_at = date('Y-m-d H:i:s');
         $model->money = $this->getMoney();
-        $model->token_payment = \Yii::$app->security->generateRandomString(32);
+        $model->token_payment = Yii::$app->security->generateRandomString(32);
+
         return $model;
     }
 
     /**
-     * create date success paid
-     * @param  object $model
-     * @return object
+     * Create date success paid
      */
-    protected function savePaidYoo($model)
+    protected function savePaidYoo(ArInvoiceUmarov $model): ArInvoiceUmarov
     {
-         if (isset($this->data['status']) && (int)$this->data['status'] == 1 && !$model['paid_at']) {
+        if (
+            isset($this->data['status'])
+            && (int) $this->data['status'] === 1
+            && !$model['paid_at']
+        ) {
             $model->paid_at = date('Y-m-d H:i:s');
-            $model->yookassa_cancellation_details = NULL;
+            $model->yookassa_cancellation_details = null;
         }
+
         return $model;
     }
 
     /**
-     * получить стоимость тарифа
-     * @return float
+     * Get tariff cost
      */
-    protected function getMoney()
+    protected function getMoney(): float
     {
         $object = new ReadMoney($this->data['type_id']);
-        $object->setPromoId($this->data['promo_id']??0);
+        $object->setPromoId($this->data['promo_id'] ?? 0);
         $object->setTypeId($this->data['type_id']);
         $object->build();
-        return $object->getResult();
+
+        return (float) $object->getResult();
     }
 }

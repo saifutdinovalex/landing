@@ -2,44 +2,39 @@
 
 namespace models\invoice\money;
 
-use Yii;
 use models\ABaseObject;
+use Yii;
 
 class BaseRead extends ABaseObject
 {
-    protected $config;
-    protected $tariff;
-    protected $service_type;
+    protected object $config;
+    protected ?array $tariff = null;
+    protected string $service_type;
+    protected int $type_id;
 
-    /**
-     * @param string $value 
-     */
-    public function setServiceType($value)
+    public function setServiceType(string $value): self
     {
         $this->service_type = $value;
+
         return $this;
     }
 
-    protected $type_id;
-
-    /**
-     * тип тарифа
-     * @param int $value
-     */
-    public function setTypeId($value)
+    public function setTypeId(int $value): self
     {
         $this->type_id = $value;
+
         return $this;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function build()
+    public function build(): self
     {
         $config = $this->config;
         $money = $config::getTariffConfig($this->type_id);
-        $this->result = $money['price'];
+        $this->result = (float) $money['price'];
+
         return $this;
     }
 }

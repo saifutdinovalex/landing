@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace models\response;
 
 use yii\data\Pagination;
@@ -7,37 +9,34 @@ use yii\helpers\Url;
 
 class Response
 {
-    const RESPONSE_FORBIDDEN = 'forbidden';
-    const RESPONSE_NOT_EXISTS = 'not_exists';
+    public const RESPONSE_FORBIDDEN = 'forbidden';
+    public const RESPONSE_NOT_EXISTS = 'not_exists';
 
-    public $data = null;
-    public $pagination = null;
-    public $status = null;
-    public $count = null;
-    public $extra = null;
-    public $params = [];
+    public mixed $data = null;
+    public ?array $pagination = null;
+    public ?int $status = null;
+    public ?int $count = null;
+    public mixed $extra = null;
+    public array $params = [];
 
-    protected $result= [];
+    protected array $result = [];
 
-    /**
-     * @param $data
-     * @return $this
-     */
-    public function setData($data)
+    public function setData(mixed $data): self
     {
         $this->data = $data;
+
         return $this;
     }
 
-    /**
-     * @param Pagination $pages
-     * @return $this
-     */
-    public function setPagination(Pagination $pages)
+    public function setPagination(Pagination $pages): self
     {
         $this->pagination['links']['self'] = Url::current(['page' => $pages->getPage() + 1]);
-        $this->pagination['links']['next'] = $pages->getPage() + 1 < $pages->getPageCount() ? Url::current(['page' => $pages->getPage() + 2]) : '';
-        $this->pagination['links']['prev'] = $pages->getPage() > 0 ? Url::current(['page' => $pages->getPage()]) : '';
+        $this->pagination['links']['next'] = $pages->getPage() + 1 < $pages->getPageCount() 
+            ? Url::current(['page' => $pages->getPage() + 2]) 
+            : '';
+        $this->pagination['links']['prev'] = $pages->getPage() > 0 
+            ? Url::current(['page' => $pages->getPage()]) 
+            : '';
         $this->pagination['links']['first'] = Url::current(['page' => 1]);
         $this->pagination['links']['last'] = Url::current(['page' => $pages->getPageCount()]);
 
@@ -49,40 +48,28 @@ class Response
         return $this;
     }
 
-    /**
-     * @param $status
-     * @return $this
-     */
-    public function setStatus($status)
+    public function setStatus(int $status): self
     {
         $this->status = $status;
+
         return $this;
     }
 
-    /**
-     * @param $count
-     * @return $this
-     */
-    public function setCount($count)
+    public function setCount(int $count): self
     {
         $this->count = $count;
+
         return $this;
     }
 
-    /**
-     * @param null $extra
-     * @return BaseResponse
-     */
-    public function setExtra($extra)
+    public function setExtra(mixed $extra): self
     {
         $this->extra = $extra;
+
         return $this;
     }
 
-    /**
-     * @return $this
-     */
-    public function build()
+    public function build(): self
     {
         if ($this->status !== null) {
             $this->result['status'] = $this->status;
@@ -109,25 +96,19 @@ class Response
                 $this->result[$key] = $param;
             }
         }
+
         return $this;
     }
 
-    /**
-     * @return array
-     */
-    public function get()
+    public function get(): array
     {
         return $this->result;
     }
 
-    /**
-     * @param $key
-     * @param $param
-     * @return $this
-     */
-    public function addParams($key, $param)
+    public function addParams(string $key, mixed $param): self
     {
         $this->params[$key] = $param;
+
         return $this;
     }
 }

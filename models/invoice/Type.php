@@ -1,16 +1,18 @@
 <?php
+
+declare(strict_types=1);
+
 namespace models\invoice;
 
 class Type
 {
-    const STANDART = 1;
-    const PREMIUM = 2;
+    public const STANDART = 1;
+    public const PREMIUM = 2;
 
     /**
      * {@inheritdoc}
-     * @return array
      */
-    public static function getAll()
+    public static function getAll(): array
     {
         return [
             static::STANDART,
@@ -20,23 +22,22 @@ class Type
 
     /**
      * {@inheritdoc}
-     * @return array
      */
-    public static function getNameAll()
+    public static function getNameAll(): array
     {
         return [
             static::STANDART => 'standart',
             static::PREMIUM => 'premium',
         ];
     }
+
     /**
-     * ID тарифа
-     * @param  string $name
-     * @return int
+     * Get tariff ID by name
      */
-    public static function getName($name)
+    public static function getName(string $name): int
     {
         $statuses = static::getNameAll();
-        return array_search($name, $statuses);
+
+        return array_search($name, $statuses, true);
     }
 }
