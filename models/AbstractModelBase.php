@@ -70,7 +70,6 @@ abstract class AbstractModelBase extends AbstractModel
     protected function setDataResponse(array $value): self
     {
         $this->data_response = $value;
-
         return $this;
     }
 }

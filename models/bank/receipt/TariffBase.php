@@ -1,23 +1,23 @@
 <?php
 
-namespace models\bank\receipt;
+namespace landing\models\bank\receipt;
 
 use Yii;
-use models\ABaseObject;
-use models\invoice\Config;
+use landing\models\ABaseObject;
+use landing\models\invoice\Config;
 
 class Tariff extends ABaseObject
 {
-    protected $email;
-    protected $phone;
-    protected $tariff_id;
-    protected $amount;
+    protected string $email;
+    protected string $phone;
+    protected int $tariff_id;
+    protected float $amount;
 
     /**
      * Email 
      * @param string $value
      */
-    public function setEmail($value)
+    public function setEmail($value): self
     {
         $this->email = $value;
         return $this;
@@ -27,7 +27,7 @@ class Tariff extends ABaseObject
      * Phone
      * @param string $value
      */
-    public function setPhone($value)
+    public function setPhone($value): self
     {
         $this->phone = $value;
         return $this;
@@ -37,7 +37,7 @@ class Tariff extends ABaseObject
      * Tariff
      * @param int $value
      */ 
-    public function setTariff($value)
+    public function setTariff($value): self
     {
         $this->tariff_id = $value;
         return $this;
@@ -47,7 +47,7 @@ class Tariff extends ABaseObject
      * Amount
      * @param float $value
      */
-    public function setAmount($value)
+    public function setAmount($value): self
     {
         $this->amount = $value;
         return $this;
@@ -56,7 +56,7 @@ class Tariff extends ABaseObject
     /**
      * {@inheritdoc}
      */
-    public function build()
+    public function build(): self
     {
         $object = new Read;
         $object->setEmail($this->email);
@@ -71,7 +71,7 @@ class Tariff extends ABaseObject
     /**
      * @return string 
      */
-    protected function getDescription()
+    protected function getDescription(): string
     {
         $tariff = Config::getById($this->tariff_id);
         return $tariff['name'];

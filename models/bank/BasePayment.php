@@ -44,7 +44,7 @@ class BasePayment extends AbstractModelBase
                 'email',
                 'email',
                 'enableIDN' => true,
-                'message' => Yii::t('error', 'Email is incorrect. ')
+                'message' => Yii::t('error', 'Email is incorrect.')
             ],
             [
                 [

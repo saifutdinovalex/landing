@@ -1,6 +1,6 @@
 <?php
 
-namespace models\bank\receipt;
+namespace landing\models\bank\receipt;
 
 use Yii;
 use models\invoice\Config;
@@ -14,6 +14,6 @@ class Tariff extends TariffBase
     protected function getDescription()
     {
         $tariff = Config::getById($this->tariff_id);
-        return 'Доступ к материалам, в рамках тарифа "'.$tariff['name'].'"';
+        return  Yii::t('error', 'Access to materials within the tariff').'"'.$tariff['name'].'"';
     }
 }

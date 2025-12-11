@@ -2,10 +2,12 @@
 
 declare(strict_types=1);
 
-namespace ar;
+namespace landing\ar;
 
 use Yii;
 use yii\db\ActiveRecord;
+use yii\behaviors\AttributeBehavior;
+use yii\db\AcitveQuery;
 
 /**
  * This is the model class for table "invoice_umarov".
@@ -27,7 +29,7 @@ use yii\db\ActiveRecord;
  * 
  * @property ArUtmUmarov|null $utmData Related UTM data
  */
-class ArInvoiceUmarov extends ActiveRecord
+class ArInvoiceUmarov extends ActiveRecord implements IInvoice
 {
     /**
      * {@inheritdoc}
@@ -62,6 +64,24 @@ class ArInvoiceUmarov extends ActiveRecord
     /**
      * {@inheritdoc}
      */
+    public function behaviors(): array
+    {
+        return [
+            'date_create' => [
+                'class' => AttributeBehavior::class,
+                'attributes' => [
+                    ActiveRecord::EVENT_BEFORE_INSERT => ['created_at'],
+                ],
+                'value' => function () {
+                    return date('Y-m-d H:i:s');
+                }
+            ],
+        ];
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function attributeLabels(): array
     {
         return [
@@ -89,7 +109,7 @@ class ArInvoiceUmarov extends ActiveRecord
      * 
      * @return \yii\db\ActiveQuery
      */
-    public function getUtmData()
+    public function getUtmData(): ActiveQuery
     {
         return $this->hasOne(ArUtmUmarov::class, ['invoice_id' => 'id']);
     }

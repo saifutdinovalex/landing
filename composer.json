@@ -14,7 +14,7 @@
     },
     "minimum-stability": "stable",
     "require": {
-        "php": ">=7.4.0",
+        "php": ">=8.3.0",
         "yiisoft/yii2": ">=2.0.21",
         "yoomoney/yookassa-sdk-php": "^2.2"
     },

@@ -13,7 +13,6 @@ class BaseYooNotification extends YooKassaFactory
 {
     protected object $invoice_save;
     protected string $invoice_model;
-    protected string $socet_name;
 
     /**
      * {@inheritdoc}

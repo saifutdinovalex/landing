@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace models;
+namespace landing\models;
 
 use models\interfaces\Observer;
 
